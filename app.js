@@ -6,6 +6,9 @@ import swaggerUi from "swagger-ui-express";
 import mongoose from 'mongoose';
 import path from 'path';
 import cors from 'cors'
+import dotenv from "dotenv";
+dotenv.config();
+
 
 // Create expess server object
 const app = express();
