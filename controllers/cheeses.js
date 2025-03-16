@@ -82,6 +82,7 @@ router.get('/:id', async (req, res) => {
  *         description: Bad request
  */
 router.post('/', async (req, res) => {
+    console.log("Received request body:", req.body);
     try {
         await Cheese.create(req.body);
         return res.status(201).json();  // 201: resource created
