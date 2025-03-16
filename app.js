@@ -4,10 +4,16 @@ import cheesesController from './controllers/cheeses.js';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from "swagger-ui-express";
 import mongoose from 'mongoose';
+import path from 'path';
+import cors from 'cors'
 
 // Create expess server object
 const app = express();
 app.use(bodyParser.json());
+
+// Get public path for angular client app
+const __dirname = path.resolve();
+ app.use(express.static(`${__dirname}/public`));
 
 // swagger config
 const docOptions = {
@@ -28,8 +34,17 @@ mongoose.connect(process.env.DB, {})
     .then((res) => console.log("Connected to MongoDb"))
     .catch((err) => console.log(`Connection failure ${err}`))
 
+// cors: allow angular client http access
+app.use(cors({
+    origin: process.env.CLIENT_URL,
+    methods: 'GET,POST,PUT,DELETE,HEAD,OPTIONS'
+}));
+
 // Controllers
 app.use('/api/v1/cheeses', cheesesController);
+app.use('*', (req, res) => {
+    res.sendFile(`${__dirname}/public/index.html`);
+});
 
 // Start web server
 app.listen(3000, () => {
