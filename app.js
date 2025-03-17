@@ -10,7 +10,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import cors from 'cors'
-import path from 'path';
+
 
 // Passport auth
 import passport from 'passport';
