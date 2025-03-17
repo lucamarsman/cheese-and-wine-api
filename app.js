@@ -1,12 +1,20 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import cheesesController from './controllers/cheeses.js';
+import usersController from './controllers/users.js';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from "swagger-ui-express";
 import mongoose from 'mongoose';
 import path from 'path';
 import dotenv from "dotenv";
 dotenv.config();
+
+import cors from 'cors'
+import path from 'path';
+
+// Passport auth
+import passport from 'passport';
+import User from './models/user.js';
 
 
 // Create expess server object
@@ -15,7 +23,7 @@ app.use(bodyParser.json());
 
 // Get public path for angular client app
 const __dirname = path.resolve();
- app.use(express.static(`${__dirname}/public`));
+app.use(express.static(`${__dirname}/public`));
 
 // swagger config
 const docOptions = {
@@ -36,8 +44,21 @@ mongoose.connect(process.env.DB, {})
     .then((res) => console.log("Connected to MongoDb"))
     .catch((err) => console.log(`Connection failure ${err}`))
 
+// cors: allow angular client http access
+app.use(cors({
+    origin: process.env.CLIENT_URL,
+    methods: 'GET,POST,PUT,DELETE,HEAD,OPTIONS'
+}));
+
+// passport auth config
+app.use(passport.initialize());
+
+// Passport-local is the default
+passport.use(User.createStrategy())
+
 // Controllers
 app.use('/api/v1/cheeses', cheesesController);
+app.use('/api/v1/users', usersController);
 app.use('*', (req, res) => {
     res.sendFile(`${__dirname}/public/index.html`);
 });
