@@ -16,10 +16,14 @@ import cors from 'cors'
 import passport from 'passport';
 import User from './models/user.js';
 
+// JWT auth
+import cookieParser from 'cookie-parser';
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 
 // Create expess server object
 const app = express();
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 // Get public path for angular client app
 const __dirname = path.resolve();
@@ -55,6 +59,29 @@ app.use(passport.initialize());
 
 // Passport-local is the default
 passport.use(User.createStrategy())
+
+// Jwt config
+const jwtOptions = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: process.env.PASSPORT_SECRET
+}
+
+// Jwt strategy
+let strategy = new JwtStrategy(jwtOptions, async (jwt_payload, callback) => {
+    try{
+        const user = await User.findById(jwt_payload.id);
+        if(user){
+            // User exists, send back no error plus the user object
+            return callback(null, user);
+        }
+        // User not found
+        return callback(null, false);
+    }catch(err){
+        return callback(err, false);
+    }
+});
+
+passport.use(strategy);
 
 // Controllers
 app.use('/api/v1/cheeses', cheesesController);
